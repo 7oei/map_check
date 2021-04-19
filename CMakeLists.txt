@@ -18,6 +18,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 
 add_executable(map_check
@@ -31,7 +32,8 @@ ament_target_dependencies(map_check
   geometry_msgs
   nav_msgs
   tf2
-  Eigen3)
+  Eigen3
+  OpenCV)
 
 target_include_directories(map_check
   PUBLIC

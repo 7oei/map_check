@@ -26,6 +26,8 @@
 #include <memory>
 #include <vector>
 
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 #include "geometry_msgs/msg/pose2_d.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
@@ -45,6 +47,7 @@ public:
   // 基本幾何計算
   double normalizeAnglePositive(double angle);
   double normalizeAngle(double angle);
+  nav_msgs::msg::OccupancyGrid getMap(cv::Mat cost_mat);
   geometry_msgs::msg::Pose2D Pose2Pose2D(const geometry_msgs::msg::Pose & pose);
   geometry_msgs::msg::Pose Pose2D2Pose(const geometry_msgs::msg::Pose2D & pose2d);
 

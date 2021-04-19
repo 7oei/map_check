@@ -81,30 +81,51 @@ double MapCheck::normalizeAngle(double angle)
   return a;
 }
 
+nav_msgs::msg::OccupancyGrid MapCheck::getMap(cv::Mat cost_mat){
+  std::cout<<"paiotu"<<std::endl;
+  std::cout << "cost_mat=" << cost_mat << std::endl << "ch=" << cost_mat.channels() << std::endl << std::endl;
+  cv::Mat cost_map = cost_mat.reshape(1,1);
+  std::cout << "cost_map=" << cost_map << std::endl << "ch=" << cost_map.channels() << std::endl << std::endl;
+  std::cout << "size[]:" << cost_map.size().width << "," << cost_map.size().height << std::endl;
+  std::vector<int>vec(cost_map.begin<int>(), cost_map.end<int>());
+  int *d_arr = &vec[0];
+  // std::cout << "vec=";
+  // for(int i=0;i<12;i++){
+  //   std::cout << "," << d_arr[i];
+  // }
+  // std::cout << std::endl;
+
+  //map出力
+  float res=0.1;
+  geometry_msgs::msg::Pose origin;
+  origin.position.x=-res*cost_mat.size().width/2;//[m]
+  origin.position.y=-res*cost_mat.size().height/2;//[m]
+  origin.position.z=0;
+  origin.orientation.x=0;
+  origin.orientation.y=0;
+  origin.orientation.z=0;
+  origin.orientation.w=1;
+  nav_msgs::msg::OccupancyGrid map;
+
+  map.header.frame_id = "map";
+  map.info.resolution = res;//[m/cells]float32
+  map.info.width = cost_mat.size().width;//[cells]uint32
+  map.info.height = cost_mat.size().height;//[cells]uint32
+  map.info.origin = origin;//geometry_msgs/Pose
+  rclcpp::Clock ros_clock(RCL_ROS_TIME);
+  map.info.map_load_time = ros_clock.now();
+  //ここどうにかする
+  for(int i=1;i<=cost_map.size().width;i++){
+    map.data.push_back(d_arr[i]);//int8(0~100)
+  }
+  return map;
+}
+
 
 void MapCheck::TimerCallback()
 {
-    //map出力
-    geometry_msgs::msg::Pose origin;
-    origin.position.x=-5;//[m]
-    origin.position.y=-5;//[m]
-    origin.position.z=0;
-    origin.orientation.x=0;
-    origin.orientation.y=0;
-    origin.orientation.z=0;
-    origin.orientation.w=1;
-    nav_msgs::msg::OccupancyGrid map;
+    cv::Mat cost_mat = (cv::Mat_<int>(3,4) << 10,20,30,40,50,60,50,40,30,20,10,0);
+    
 
-    map.header.frame_id = "map";
-    map.info.resolution = 0.1;//[m/cells]float32
-    map.info.width = 100;//[cells]uint32
-    map.info.height = 100;//[cells]uint32
-    map.info.origin = origin;//geometry_msgs/Pose
-    rclcpp::Clock ros_clock(RCL_ROS_TIME);
-    map.info.map_load_time = ros_clock.now();
-    for(int i=1;i<=10000;i++){
-    map.data.push_back(1+i/103);//int8(0~100)
-    }
-
-    this->pub_map->publish(map);
+    this->pub_map->publish(MapCheck::getMap(cost_mat));
 }
