@@ -39,7 +39,7 @@ MapCheck::MapCheck()
 : Node("map_check")
 {
   pub_map = this->create_publisher<nav_msgs::msg::OccupancyGrid>("map", 10);
-
+  event_sub = this->create_subscription<geometry_msgs::msg::PoseStamped>("/goal_pose", 10, std::bind(&MapCheck::Callback, this, _1));
   // Timer
   control_period=0.1;
   auto timer_duration = std::chrono::duration<double>(control_period);
@@ -85,12 +85,12 @@ nav_msgs::msg::OccupancyGrid MapCheck::getMap(cv::Mat cost_mat){
   //map出力
   float res=0.1;
   geometry_msgs::msg::Pose origin;
-  origin.position.x=res*cost_mat.size().width/2;//[m]
+  origin.position.x=-res*cost_mat.size().width/2;//[m]
   origin.position.y=res*cost_mat.size().height/2;//[m]
   origin.position.z=0;
-  origin.orientation.x=0;
+  origin.orientation.x=1;
   origin.orientation.y=0;
-  origin.orientation.z=1;
+  origin.orientation.z=0;
   origin.orientation.w=0;
   nav_msgs::msg::OccupancyGrid map;
 
@@ -113,15 +113,27 @@ nav_msgs::msg::OccupancyGrid MapCheck::getMap(cv::Mat cost_mat){
   return map;
 }
 
+void MapCheck::Callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg){
+  set=true;
+  g_pd=true;
+  RCLCPP_INFO(this->get_logger(), "pd");
+}
+
 
 void MapCheck::TimerCallback()
 {
-    //cv::Mat cost_mat = (cv::Mat_<int>(3,4) << 10,20,30,40,50,60,50,40,30,20,10,0);
-    cv::Mat img = cv::imread("/home/adachi/Lena_gray.jpg");
+  if(g_pd && page <= 6){//スライドの更新
+    std::string filepath = "/home/adachi/slides/" + std::to_string(page) + ".JPG";
+    std::cout << filepath << std::endl;
+    cv::Mat img = cv::imread(filepath.c_str());
+    std::cout << "size[]:" << img.size().width << "," << img.size().height << std::endl;
+    g_pd=false;
+    page++;
     if (img.empty() == false) {
       cv::Mat cost_mat;
       cv::cvtColor(img, cost_mat,cv::COLOR_BGR2GRAY);
-      //cvShowImage("opencv_logo", cost_mat);
       this->pub_map->publish(MapCheck::getMap(cost_mat));
     }
+  }
+  if(page==6)page=1;
 }

@@ -43,6 +43,7 @@ class MapCheck : public rclcpp::Node
 public:
   MapCheck();
   // コールバック
+  void Callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg);
   void TimerCallback();
   // 基本幾何計算
   double normalizeAnglePositive(double angle);
@@ -53,8 +54,13 @@ public:
 
 private:
   double control_period;
+  bool g_pd=false,set=false;
+  int page=1;
+  
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr pub_map;
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr event_sub;
   rclcpp::TimerBase::SharedPtr timer;
+
 };
 
 #endif  // MAP_CHECK__MAP_CHECK_HPP_
