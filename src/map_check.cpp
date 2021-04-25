@@ -122,7 +122,8 @@ void MapCheck::Callback(const geometry_msgs::msg::PoseStamped::SharedPtr msg){
 
 void MapCheck::TimerCallback()
 {
-  if(g_pd && page <= 6){//スライドの更新
+  int pages=14;
+  if(g_pd && page <= pages){//スライドの更新
     std::string filepath = "/home/adachi/slides/" + std::to_string(page) + ".JPG";
     std::cout << filepath << std::endl;
     cv::Mat img = cv::imread(filepath.c_str());
@@ -135,5 +136,5 @@ void MapCheck::TimerCallback()
       this->pub_map->publish(MapCheck::getMap(cost_mat));
     }
   }
-  if(page==6)page=1;
+  if(page==(pages+1))page=1;
 }
