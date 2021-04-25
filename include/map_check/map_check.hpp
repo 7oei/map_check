@@ -45,16 +45,26 @@ public:
   // コールバック
   void TimerCallback();
   // 基本幾何計算
-  double normalizeAnglePositive(double angle);
-  double normalizeAngle(double angle);
-  nav_msgs::msg::OccupancyGrid getMap(cv::Mat cost_mat);
   geometry_msgs::msg::Pose2D Pose2Pose2D(const geometry_msgs::msg::Pose & pose);
   geometry_msgs::msg::Pose Pose2D2Pose(const geometry_msgs::msg::Pose2D & pose2d);
+  double normalizeAnglePositive(double angle);
+  double normalizeAngle(double angle);
+  //フィールド処理インフラ
+  cv::Mat makeFieldCostMat(double size_x,double size_y, float cell_size);
+  Eigen::Vector2i m2pix(Eigen::Vector2d m_point,cv::Mat cost_mat,float cell_size);
+  //Eigen::Vector2i mm2pix(Eigen::Vector2d m_point,cv::Mat cost_mat,float cell_size);
+  nav_msgs::msg::OccupancyGrid getMap(cv::Mat cost_mat,float cell_size);
+  
 
 private:
   double control_period;
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr pub_map;
   rclcpp::TimerBase::SharedPtr timer;
+
+  float cell_size=0.01;//[m/cell]
+  double size_x=10.4;//[m]
+  double size_y=7.4;//[m]
+  
 };
 
 #endif  // MAP_CHECK__MAP_CHECK_HPP_
