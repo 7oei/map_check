@@ -50,9 +50,14 @@ public:
   double normalizeAnglePositive(double angle);
   double normalizeAngle(double angle);
   //フィールド処理インフラ
-  cv::Mat makeFieldCostMat(double size_x,double size_y, float cell_size);
+  cv::Mat makeFieldCostMat(double size_x,double size_y,int value, float cell_size);
   Eigen::Vector2i m2pix(Eigen::Vector2d m_point,cv::Mat cost_mat,float cell_size);
   //Eigen::Vector2i mm2pix(Eigen::Vector2d m_point,cv::Mat cost_mat,float cell_size);
+  void setInsideRectangle(cv::Mat *cost_mat,int value,Eigen::Vector2d p1,Eigen::Vector2d p2,Eigen::Vector2d p3,Eigen::Vector2d p4);
+  void setOutsideRectangle(cv::Mat *cost_mat,int value,Eigen::Vector2d p1,Eigen::Vector2d p2,Eigen::Vector2d p3,Eigen::Vector2d p4);
+  void setInsideCircle(cv::Mat *cost_mat,int value,Eigen::Vector2d p,float r);
+  void setInsideLine(cv::Mat *cost_mat,int value,Eigen::Vector2d p1,Eigen::Vector2d p2,float r);
+  void setInsideOsiri(cv::Mat *cost_mat,int value,Eigen::Vector2d p,float angle,float r);
   nav_msgs::msg::OccupancyGrid getMap(cv::Mat cost_mat,float cell_size);
   
 
@@ -60,7 +65,8 @@ private:
   double control_period;
   rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr pub_map;
   rclcpp::TimerBase::SharedPtr timer;
-
+  int obstacle_value=100;
+  int space_value=0;
   float cell_size=0.01;//[m/cell]
   double size_x=10.4;//[m]
   double size_y=7.4;//[m]
